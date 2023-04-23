@@ -63,7 +63,7 @@ function returnFnResult(Fn) {
    console.log(f()); // выведет 12
    console.log(f()); // выведет 13
  */
-function returnCounter(i:number = 0) { 
+function returnCounter(i,number = 0) { 
   return () => ++i;
 }
 
@@ -76,7 +76,9 @@ function returnCounter(i:number = 0) {
  Пример:
    returnArgumentsArray(1, 2, 3) вернет [1, 2, 3]
  */
-function returnArgumentsArray() {}
+function returnArgumentsArray(...numbers) {
+  return numbers
+}
 
 export {
   returnFirstArgument,
