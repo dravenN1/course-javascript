@@ -33,7 +33,7 @@ function returnFirstArgument(foo) {
  Пример:
    sumWithDefaults(10) вернет 110
  */
-function sumWithDefaults(a, b) {
+function sumWithDefaults(a, b = 100) {
   return a + b;
 }
 
@@ -63,7 +63,7 @@ function returnFnResult(Fn) {
    console.log(f()); // выведет 12
    console.log(f()); // выведет 13
  */
-function returnCounter(i,number = 0) { 
+function returnCounter(i = 0) { 
   return () => ++i;
 }
 
