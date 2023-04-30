@@ -20,7 +20,21 @@
    isAllTrue([1, 2, 3, 4, 5], n => n < 10) // вернет true (потому что все элементы массива меньше 10)
    isAllTrue([100, 2, 3, 4, 5], n => n < 10) // вернет false (потому что как минимум первый элемент больше 10)
  */
-function isAllTrue(array, fn) {}
+function isAllTrue(array, fn) {
+  if (!Array.isArray(array) || array.length === 0) {
+    throw new Error ('empty array')
+  }
+  if (typeof fn !=='function'){
+    throw new Error ('fn is not a function')
+  }
+  for (const el of array){
+    if(!fn(el)) {
+      return false
+    }
+  }
+
+  return true
+}
 
 /*
  Задание 2:
@@ -43,7 +57,19 @@ function isAllTrue(array, fn) {}
    isSomeTrue([1, 2, 3, 4, 5], n => n > 20) // вернет false (потому что в массиве нет ни одного элемента больше 20)
  */
 function isSomeTrue(array, fn) {}
+  if (!Array.isArray(array) || array.length === 0) {
+    throw new Error ('empty array')
+  }
+  if (typeof fn !=='function'){
+    throw new Error ('fn is not a function')
+  }
 
+  for (const el of array){
+    if(fn(el)) {
+      return true
+    }
+  }
+  return false
 /*
  Задание 3:
 
@@ -56,7 +82,23 @@ function isSomeTrue(array, fn) {}
    - fn не является функцией (с текстом "fn is not a function")
      для проверки на функцию вам может помочь оператор typeof
  */
-function returnBadArguments() {}
+function returnBadArguments(fn, ...args) {
+  if (typeof fn !=='function'){
+    throw new Error ('fn is not a function')
+  }
+
+  const badArgs = [];
+
+  for (const of args) {
+    try {
+      fn(arg);
+    } catch {
+      badArgs.push(arg)
+    }
+  }
+
+  return badArgs
+}
 
 /*
  Задание 4:
