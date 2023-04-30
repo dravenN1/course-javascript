@@ -1,0 +1,3 @@
+function getRandomElement (array) {
+    
+}
