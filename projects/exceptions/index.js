@@ -89,7 +89,7 @@ function returnBadArguments(fn, ...args) {
 
   const badArgs = [];
 
-  for (const of args) {
+  for (const arg of args) {
     try {
       fn(arg);
     } catch {
@@ -126,8 +126,31 @@ function returnBadArguments(fn, ...args) {
    console.log(calc.div(2, 2)); // выведет 2.5 (10 / 2 / 2)
    console.log(calc.div(2, 0)); // выбросит исключение, потому что один из аргументов равен 0
  */
-function calculator(number) {}
 
+   function calculator(number = 0) {
+    if(typeof number !== 'number'){
+      throw new Error ('number is not a number')
+    }
+  
+    return {
+      sum(...args) {
+        return args.reduce((all, current) => all + current, number)
+      },
+      dif(...args) {
+        return args.reduce((all, current) => all - current, number)
+      },
+      div(...args) {
+        if (args.some(a => a === 0)) {
+          throw new Error ('division by 0')
+        }
+  
+        return args.reduce((all, current) => all / current, number)
+      },
+      mul(...args) {
+        return args.reduce((all, current) => all * current, number)
+      }
+    }
+  }
 /* При решении задач, постарайтесь использовать отладчик */
 
 export { isAllTrue, isSomeTrue, returnBadArguments, calculator };
