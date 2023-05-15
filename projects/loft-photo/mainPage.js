@@ -28,8 +28,8 @@ export default {
         const direction = e.changedTouches[0].pageY - startFrom.y;
 
         if (direction < 0) {
-            await this.getNextPhoto();
+            await this.getNextPhoto(); 
         }
-    })
+    });
   },
 };
