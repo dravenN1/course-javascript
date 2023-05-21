@@ -11,7 +11,7 @@ export default {
         await model.init();
 
         pages.openPage('main');
-        await mainPage.getNextPhoto;
+        await mainPage.getNextPhoto();
       });
   },
 };
