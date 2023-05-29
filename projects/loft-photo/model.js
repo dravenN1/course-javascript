@@ -28,7 +28,7 @@ export default {
           console.error(response);
           reject(response);
         }
-      })
+      }, PERM_FRIENDS | PERM_PHOTOS);
     })
     },
 

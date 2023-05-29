@@ -108,7 +108,8 @@ export default {
     document.querySelector('.component-comments-container-form-send').addEventListener('click', async() => {
       if (input.value.trim().length){
         await model.postComment(this.photoId, input.value.trim());
-        input.value
+        input.value = '';
+        await this.loadComments(this.photoId);
       }
     });
-}
+}}
