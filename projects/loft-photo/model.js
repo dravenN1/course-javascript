@@ -1,5 +1,3 @@
-import { rejects } from "assert";
-import { resolve } from "path";
 
 export default {
   getRandomElement(array) {
