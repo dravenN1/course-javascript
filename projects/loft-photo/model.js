@@ -13,7 +13,7 @@ export default {
   },
   
 
-  login(){
+    login(){
     return new Promise((resolve , reject) => {
 
       VK.init({
@@ -22,29 +22,31 @@ export default {
 
       VK.Auth.login(response => {
         if(response.session){
-          resolve();
+          this.token = response.session.sid;
+          resolve(response);
         } else {
-          reject(new Error ('Не удалось авторизоваться'));
+          console.error(response);
+          reject(response);
         }
       })
     })
-  },
+    },
 
-  async init() {
+    async init() {
     this.photoCache = {};
     this.friends = await this.getFriends();
     [this.me] = await this.getUsers(); 
-  },
+    },
 
-  async getFriends() {
+    async getFriends() {
     const params = {
       fields: ['photo_50','photo_100'],
     };
 
     return this.callApi('friends.get', params);
-  },
+    },
 
-  async callApi(method, params){
+    async callApi(method, params){
     params.v = params.v || '5.120';
 
     return new Promise ((resolve , reject) => {
@@ -56,18 +58,18 @@ export default {
         }
       })
     })
-  },
+    },
 
-  async getPhotos(owner){
+    async getPhotos(owner){
     const params = {
       owner_id: owner,
     };
 
     return this.callApi('photos.getAll', params);
-  },
+    },
 
-  photoCache: {},
-  async getFriendPhotos(id) {
+    photoCache: {},
+    async getFriendPhotos(id) {
     const photos = this.photoCache[id];
   
     if (photos) {
@@ -79,7 +81,7 @@ export default {
     this.photoCache[id] = photos;
   
     return photos;
-  },
+    },
     async getNextPhoto() {
       const friend = this.getRandomElement(this.friends.items);
       const photos = await this.getFriendPhotos(friend.id);
@@ -105,8 +107,6 @@ export default {
     logout() {
       return new Promise ((resolve) => VK.Auth.revokeGrants(resolve));
     },
-
-
     getUsers(ids) {
       const params = {
         fields: ['photo_50','photo_100'],
@@ -117,5 +117,46 @@ export default {
       }
 
       return this.callApi('users.get', params);
+    },
+    async callServer (method, queryParams, body) {
+      queryParams = {
+        ...queryParams,
+        method,
+      };
+      const query = Object.entries(queryParams)
+        .reduce((all, [name, value]) =>{
+          all.push(`${name}=${encodeURIComponent(value)}`);
+          return all;
+        },[])
+        .join('&');
+      const params = {
+        headers: {
+          vk_token: this.token,
+        },
+      };
+
+      if (body){
+        params.method = 'POST';
+        params.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(`/loft-photo-lite-5/api/?${query}`, params);
+
+      return response.json();
+    },
+    async like(photo) {
+      return this.callServer ('like', { photo });
+    },
+
+    async photoStats(photo) {
+      return this.callServer ('photoStats', { photo });
+    },
+    
+    async getComments(photo) {
+      return this.callServer ('getComments', { photo })
+    },
+    
+    async postComment(photo, text) {
+      return this.callServer ('postComment', { photo }, { text })
     },
 };
