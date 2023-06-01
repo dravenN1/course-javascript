@@ -9,13 +9,13 @@ const DB = {
 };
 
 const methods = {
-  like(req, res, url, vkUser) {
+  like(req, res, url, vkUser) { 
     const photoId = url.searchParams.get('photo');
-    let photoLikes = DB.likes.get(photoID);
+    let photoLikes = DB.likes.get(photoId);
 
     if (!photoLikes) {
       photoLikes = new Map();
-      DB.likes.set(photoID, photoLikes);
+      DB.likes.set(photoId, photoLikes);
     }
 
     if (photoLikes.get(vkUser.id)) {

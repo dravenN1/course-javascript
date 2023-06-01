@@ -1,11 +1,13 @@
 import pages from './pages';
 import model from './model';
 import profilePage from './profilePage';
+import commentsTemplate from './commentsTemplate.html.hbs';
 
 export default {
   async getNextPhoto() {
     const { friend, id, url } = await model.getNextPhoto();
-    this.setFriendAndPhoto(friend, id, url);
+    const photoStats = await model.photoStats(id);
+    this.setFriendAndPhoto(friend, id, url, photoStats);
   },
 
   setFriendAndPhoto(friend, id, url, stats) {
@@ -49,7 +51,7 @@ export default {
     likesElement.innerText = total;
 
     if (liked) {
-      likesElement.classlist.add('liked');
+      likesElement.classList.add('liked');
     } else {
       likesElement.classList.remove('liked');
     }
@@ -64,14 +66,14 @@ export default {
 
   handleEvents() {
     let startFrom;
-    document.querySelector('.component-photo').addEventListener('mouseup', (e) => {
+    document.querySelector('.component-photo').addEventListener('touchstart', (e) => {
       e.preventDefault();
       startFrom = { y: e.changedTouches[0].pageY };
     });
 
     document
       .querySelector('.component-photo')
-      .addEventListener('mousedown', async (e) => {
+      .addEventListener('touchend', async (e) => {
         const direction = e.changedTouches[0].pageY - startFrom.y;
 
         if (direction < 0) {
