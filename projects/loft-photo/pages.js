@@ -6,14 +6,13 @@ const pagesMap = {
 
 let currentPage = null;
 
-
 export default {
   openPage(name) {
     const selector = pagesMap[name];
     const element = document.querySelector(selector);
 
-    currentPage?.classlist.add('hidden');
+    currentPage?.classList.add('hidden');
     currentPage = element;
-    currentPage.classlist.remove('hidden');
+    currentPage.classList.remove('hidden');
   },
 };

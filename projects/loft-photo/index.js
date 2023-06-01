@@ -1,5 +1,5 @@
 import pages from './pages';
-import model from '../loft-photo/model'
+import model from '../loft-photo/model';
 import profilePage from './profilePage';
 import('./styles.css');
 

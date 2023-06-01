@@ -1,7 +1,9 @@
+const PERM_FRIENDS = 2;
+const PERM_PHOTOS = 4;
 
 export default {
   getRandomElement(array) {
-    if (!array.length){
+    if (!array.length) {
       return null;
     }
 
@@ -9,17 +11,15 @@ export default {
 
     return array[index];
   },
-  
 
-    login(){
-    return new Promise((resolve , reject) => {
-
+  login() {
+    return new Promise((resolve, reject) => {
       VK.init({
-        apiID: 51645546,
+        apiId: 51661895,
       });
 
-      VK.Auth.login(response => {
-        if(response.session){
+      VK.Auth.login((response) => {
+        if (response.session) {
           this.token = response.session.sid;
           resolve(response);
         } else {
@@ -27,134 +27,140 @@ export default {
           reject(response);
         }
       }, PERM_FRIENDS | PERM_PHOTOS);
-    })
-    },
+    });
+  },
 
-    async init() {
+  async init() {
     this.photoCache = {};
     this.friends = await this.getFriends();
-    [this.me] = await this.getUsers(); 
-    },
+    [this.me] = await this.getUsers();
+  },
 
-    async getFriends() {
+  async getFriends() {
     const params = {
-      fields: ['photo_50','photo_100'],
+      fields: ['photo_50', 'photo_100'],
     };
 
     return this.callApi('friends.get', params);
-    },
+  },
 
-    async callApi(method, params){
+  async callApi(method, params) {
     params.v = params.v || '5.120';
 
-    return new Promise ((resolve , reject) => {
-      VK.api(method, params, (response) =>{
+    return new Promise((resolve, reject) => {
+      VK.api(method, params, (response) => {
         if (response.error) {
-          reject (new Error(response.error.error_msg));
+          reject(new Error(response.error.error_msg));
         } else {
           resolve(response.response);
         }
-      })
-    })
-    },
+      });
+    });
+  },
 
-    async getPhotos(owner){
+  photoCache: {},
+
+  async getPhotos(owner) {
     const params = {
       owner_id: owner,
     };
 
     return this.callApi('photos.getAll', params);
-    },
+  },
 
-    photoCache: {},
-    async getFriendPhotos(id) {
-    const photos = this.photoCache[id];
-  
+  async getFriendPhotos(id) {
+    let photos = this.photoCache[id];
+
     if (photos) {
       return photos;
     }
-  
+
     photos = await this.photoCache[id];
 
     this.photoCache[id] = photos;
-  
+
     return photos;
-    },
-    async getNextPhoto() {
-      const friend = this.getRandomElement(this.friends.items);
-      const photos = await this.getFriendPhotos(friend.id);
-      const photo = this.getRandomElement(photos.items);
-      const size = this.findSize(photo);
+  },
 
-      return {friend, id: photo.id, url: photo.url};
-    },
+  async getNextPhoto() {
+    const friend = this.getRandomElement(this.friends.items);
+    console.log(friend);
+    const photos = await this.getFriendPhotos(friend.id);
+    console.log(photos);
+    const photo = this.getRandomElement(photos.items);
+    console.log(photo);
+    const size = this.findSize(photo);
 
-    async findSize(photo) {
-      const size = photo.sizes.find((size) => size.width >= 360);
+    return { friend, id: photo.id, url: photo.url };
+  },
 
-      if (!size) {
-        return photo.sizes.reduce((biggest, current) => {
-          if(current.width > biggest.width){
-            return current;
-          }
+  async findSize(photo) {
+    const size = photo.sizes.find((size) => size.width >= 360);
 
-          return biggest;
-        }, photo.sizes[0]);
-      } return size;
-    },
-    logout() {
-      return new Promise ((resolve) => VK.Auth.revokeGrants(resolve));
-    },
-    getUsers(ids) {
-      const params = {
-        fields: ['photo_50','photo_100'],
-      };
-      
-      if (ids) {
-        params.user_ids = ids;
-      }
+    if (!size) {
+      return photo.sizes.reduce((biggest, current) => {
+        if (current.width > biggest.width) {
+          return current;
+        }
 
-      return this.callApi('users.get', params);
-    },
-    async callServer (method, queryParams, body) {
-      queryParams = {
-        ...queryParams,
-        method,
-      };
-      const query = Object.entries(queryParams)
-        .reduce((all, [name, value]) =>{
-          all.push(`${name}=${encodeURIComponent(value)}`);
-          return all;
-        },[])
-        .join('&');
-      const params = {
-        headers: {
-          vk_token: this.token,
-        },
-      };
+        return biggest;
+      }, photo.sizes[0]);
+    }
+    return size;
+  },
+  logout() {
+    return new Promise((resolve) => VK.Auth.revokeGrants(resolve));
+  },
+  getUsers(ids) {
+    const params = {
+      fields: ['photo_50', 'photo_100'],
+    };
 
-      if (body){
-        params.method = 'POST';
-        params.body = JSON.stringify(body);
-      }
+    if (ids) {
+      params.user_ids = ids;
+    }
 
-      const response = await fetch(`/loft-photo-lite-5/api/?${query}`, params);
+    return this.callApi('users.get', params);
+  },
+  async callServer(method, queryParams, body) {
+    queryParams = {
+      ...queryParams,
+      method,
+    };
+    const query = Object.entries(queryParams)
+      .reduce((all, [name, value]) => {
+        all.push(`${name}=${encodeURIComponent(value)}`);
+        return all;
+      }, [])
+      .join('&');
+    const params = {
+      headers: {
+        vk_token: this.token,
+      },
+    };
 
-      return response.json();
-    },
-    async like(photo) {
-      return this.callServer ('like', { photo });
-    },
+    if (body) {
+      params.method = 'POST';
+      params.body = JSON.stringify(body);
+    }
 
-    async photoStats(photo) {
-      return this.callServer ('photoStats', { photo });
-    },
-    
-    async getComments(photo) {
-      return this.callServer ('getComments', { photo })
-    },
-    
-    async postComment(photo, text) {
-      return this.callServer ('postComment', { photo }, { text })
-    },
+    const response = await fetch(`/loft-photo-lite-5/api/?${query}`, params);
+
+    return response.json();
+  },
+  async like(photo) {
+    return this.callServer('like', { photo });
+  },
+
+  async photoStats(photo) {
+    return this.callServer('photoStats', { photo });
+  },
+
+  async getComments(photo) {
+    return this.callServer('getComments', { photo });
+  },
+
+  async postComment(photo, text) {
+    return this.callServer('postComment', { photo }, { text });
+  },
 };

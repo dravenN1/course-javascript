@@ -22,12 +22,12 @@ export default {
     photoComp.style.backgroundImage = `url(${url})`;
     footerPhotoComp.style.backgroundImage = `url('${model.me.photo_50}')`;
     this.setLikes(stats.likes, stats.liked);
-    this.setComments(stats.comments); 
+    this.setComments(stats.comments);
   },
   async loadComments(photo) {
     const comments = await model.getComments(photo);
     const commentsElements = commentsTemplate({
-      list: comments.map((comment) =>{
+      list: comments.map((comment) => {
         return {
           name: `${comment.user.first_name ?? ''} ${comment.user.last_name ?? ''}`,
           photo: comment.user.photo_50,
@@ -64,52 +64,65 @@ export default {
 
   handleEvents() {
     let startFrom;
-    document.querySelector('.component-photo').addEventListener('mouseup',(e) => {
-        e.preventDefault();
-        startFrom = {y: e.changedTouches[0].pageY}
+    document.querySelector('.component-photo').addEventListener('mouseup', (e) => {
+      e.preventDefault();
+      startFrom = { y: e.changedTouches[0].pageY };
     });
-    
-    document.querySelector('.component-photo').addEventListener('mousedown', async (e) => {
+
+    document
+      .querySelector('.component-photo')
+      .addEventListener('mousedown', async (e) => {
         const direction = e.changedTouches[0].pageY - startFrom.y;
 
         if (direction < 0) {
-            await this.getNextPhoto(); 
+          await this.getNextPhoto();
         }
-    });
+      });
 
-    document.querySelector('.component-header-profile-link').addEventListener('click', async() =>{
-      await profilePage.setUser(this.friend);
-      pages.openPage('profile');
-    });
+    document
+      .querySelector('.component-header-profile-link')
+      .addEventListener('click', async () => {
+        await profilePage.setUser(this.friend);
+        pages.openPage('profile');
+      });
 
-    document.querySelector('.component-footer-container-profile-link').addEventListener('click', async()=> {
-      await profilePage.setUser(model.me);
-      pages.openPage('profile');
-    });
+    document
+      .querySelector('.component-footer-container-profile-link')
+      .addEventListener('click', async () => {
+        await profilePage.setUser(model.me);
+        pages.openPage('profile');
+      });
 
-    document.querySelector('.component-footer-container-social-likes').addEventListener('click', async() => {
-      const { likes, liked} = await model.like(this.photoId);
-      this.setLikes (likes, liked);
-    });
+    document
+      .querySelector('.component-footer-container-social-likes')
+      .addEventListener('click', async () => {
+        const { likes, liked } = await model.like(this.photoId);
+        this.setLikes(likes, liked);
+      });
 
-    document.querySelector('.component-footer-container-social-comments').addEventListener('click', async() => {
-      document.querySelector('.component-comments').classList.remove('hidden');
-      await this.loadComments(this.photoId);
-    });
+    document
+      .querySelector('.component-footer-container-social-comments')
+      .addEventListener('click', async () => {
+        document.querySelector('.component-comments').classList.remove('hidden');
+        await this.loadComments(this.photoId);
+      });
 
     const input = document.querySelector('.component-comments-container-form-input');
 
-    document.querySelector('.component-comments').addEventListener('click', async() => {
+    document.querySelector('.component-comments').addEventListener('click', async (e) => {
       if (e.target === e.currentTarget) {
         document.querySelector('.component-comments').classList.add('hidden');
       }
     });
 
-    document.querySelector('.component-comments-container-form-send').addEventListener('click', async() => {
-      if (input.value.trim().length){
-        await model.postComment(this.photoId, input.value.trim());
-        input.value = '';
-        await this.loadComments(this.photoId);
-      }
-    });
-}}
+    document
+      .querySelector('.component-comments-container-form-send')
+      .addEventListener('click', async () => {
+        if (input.value.trim().length) {
+          await model.postComment(this.photoId, input.value.trim());
+          input.value = '';
+          await this.loadComments(this.photoId);
+        }
+      });
+  },
+};
